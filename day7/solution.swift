@@ -25,13 +25,15 @@ enum Operation {
 
 
 class Gate {
-	var name : String
 	var op : Operation
 	var output : UInt16?
 
-	init( _ name: String, _ op : Operation ) {
-		self.name = name
+	init( _ op : Operation ) {
 		self.op = op
+	}
+
+	func reset() {
+		output = nil
 	}
 }
 
@@ -42,18 +44,18 @@ func parseGate( let command : String ) {
 
 	switch t[1] {
 	case "OR":
-		gates[name] = Gate( name, Operation.OR( Src.Gen(t[0]), Src.Gen(t[2]) ) )
+		gates[name] = Gate( Operation.OR( Src.Gen(t[0]), Src.Gen(t[2]) ) )
 	case "AND":
-		gates[name] = Gate( name, Operation.AND( Src.Gen(t[0]), Src.Gen(t[2]) ) )
+		gates[name] = Gate( Operation.AND( Src.Gen(t[0]), Src.Gen(t[2]) ) )
 	case "LSHIFT":
-		gates[name] = Gate( name, Operation.LSHIFT( Src.Gen(t[0]), UInt16(t[2])!))
+		gates[name] = Gate( Operation.LSHIFT( Src.Gen(t[0]), UInt16(t[2])!))
 	case "RSHIFT":
-		gates[name] = Gate( name, Operation.RSHIFT( Src.Gen(t[0]), UInt16(t[2])!))
+		gates[name] = Gate( Operation.RSHIFT( Src.Gen(t[0]), UInt16(t[2])!))
 	case "->":
-		gates[name] = Gate( name, Operation.ASSIGN( Src.Gen(t[0])))
+		gates[name] = Gate( Operation.ASSIGN( Src.Gen(t[0])))
 	default:
 		if t[0] == "NOT" {
-			gates[name] = Gate( name, Operation.NOT( Src.Gen(t[1])))
+			gates[name] = Gate( Operation.NOT( Src.Gen(t[1])))
 		}
 		else {
 			print("Failed to parse \(command)")
@@ -106,7 +108,6 @@ func getValue(wire: String) -> UInt16? {
 					gate.output = srcA >> b
 				}
 
-
 			case .LSHIFT( let a, let b ):
 				if let srcA = parse(a) {
 					gate.output = srcA << b
@@ -128,19 +129,22 @@ var gates = Dictionary<String, Gate>()
 let input = try String( contentsOfFile: "input", encoding:NSUTF8StringEncoding )
 let lines = input.characters.split{ $0 == "\n"}.map(String.init)
 
-print("Day 7")
-
-print( "Number of lines parsed \(lines.count)")
-
 for line in lines {
 	parseGate(line)
 }
 
-
 if let result = getValue("a") {
 	print("Result on wire a is \(result)")
+
+	// Reset gates and update b.
+	for gate in gates.values { gate.reset() }
+	gates["b"] = Gate( Operation.ASSIGN( Src.Value(result) ) )
+
+	let part2 = getValue("a")!
+	print("Wire a in part 2 is \(part2)")
+
+
 } else {
 	print("There was no result")
 }
 
-print( "For part 2 anwer change input on b to result in part A.")

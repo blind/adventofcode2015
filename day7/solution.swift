@@ -125,7 +125,7 @@ func getValue(wire: String) -> UInt16? {
 	return nil
 }
 
-var gates = Dictionary<String, Gate>()
+var gates = [String:Gate]() // Optional dictionary syntax Dictionary<String, Gate>()
 let input = try String( contentsOfFile: "input", encoding:NSUTF8StringEncoding )
 let lines = input.characters.split{ $0 == "\n"}.map(String.init)
 

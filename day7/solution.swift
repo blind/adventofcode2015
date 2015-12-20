@@ -71,7 +71,7 @@ func getValue(wire: String) -> UInt16? {
 			return value
 		} else {
 
-			let parse = { (let src : Src) -> UInt16? in 
+			let evaluate = { (let src : Src) -> UInt16? in 
 				switch src {
 					case .Wire( let w ):
 						return getValue( w )
@@ -83,38 +83,38 @@ func getValue(wire: String) -> UInt16? {
 			switch gate.op {
 			case .AND( let a, let b ):
 
-				let srcA = parse(a)
-				let srcB = parse(b)
+				let srcA = evaluate(a)
+				let srcB = evaluate(b)
 
 				if (srcA != nil) && (srcB != nil) {
 					gate.output = srcA!&srcB!
 				}
 
 			case .NOT( let a ):
-				if let tmp = parse(a) {
+				if let tmp = evaluate(a) {
 					gate.output = ~tmp
 				}
 
 			case .OR( let a, let b ):
-				let srcA = parse(a)
-				let srcB = parse(b)
+				let srcA = evaluate(a)
+				let srcB = evaluate(b)
 
 				if (srcA != nil) && (srcB != nil) {
 					gate.output = srcA! | srcB!
 				}
 
 			case .RSHIFT( let a, let b ):
-				if let srcA = parse(a) {
+				if let srcA = evaluate(a) {
 					gate.output = srcA >> b
 				}
 
 			case .LSHIFT( let a, let b ):
-				if let srcA = parse(a) {
+				if let srcA = evaluate(a) {
 					gate.output = srcA << b
 				}
 
 			case .ASSIGN( let a ):
-				gate.output = parse(a)
+				gate.output = evaluate(a)
 			}
 		}
 		return gate.output
